@@ -22,7 +22,14 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('localhost', port))
 s.listen(5)
 connect, addr = s.accept()
-connect.sendto(bytes('lol', 'utf-8'), addr)
+while True:
+		str_recv, temp = connect.recvfrom(1024)
+		print (str(str_recv, 'utf-8'))
+		connect.sendto(bytes("Thanks!", 'utf-8'), addr)
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.bind(('localhost', port))
+		s.listen(5)
+		connect, addr = s.accept()
 connect.close()
 
 

@@ -68,6 +68,20 @@ class Graph:
 		else:
 			self.adjList[d] = [Edge(d,s,w)]
 
+import socket
+from threading import Thread
+from threading import Lock
+
+global connections
+global addresses
+global ports
+global fragments
+
+connections = []
+addresses = []
+ports = []
+fragments = []
+
 a = Graph(7)
 a.addEdge(0,6,7)
 a.addEdge(1,2,4)
@@ -89,19 +103,8 @@ for i in range(7):
 	fragments[i].vertices.append(i)
 	fragments[i].edges = a.adjList[i]+a.adjList[i]
 
-print (fragments[1])
-print (Fragment.strToFragment(str(fragments[1])))
-
-import socket
-from threading import Thread
-
-global connections
-global addresses
-global ports
-
-connections = []
-addresses = []
-ports = []
+#print (fragments[1])
+#print (Fragment.strToFragment(str(fragments[1])))
 
 def clientHandler ():    
     connect, addr = s.accept()
@@ -109,40 +112,53 @@ def clientHandler ():
     addresses.append(addr)
     port = addr[1]
     ports.append(port)
-    print ('connect : ', connect)
-    print ('port : ', port)
+    #print ('connect : ', connect)
+    #print ('port : ', port)
 
     connect.sendto(bytes(str(port), 'utf-8'), addr)
     connect.close()
 
-def buildMST (frag, conn, addr):
-	frag = str(frag)
-	conn.sendto(bytes(str(frag).encode('utf-8')), addr)
+working = 0
+def buildMST (port, frag, lock):
+	lock.acquire()
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+	s.connect(("localhost", port))
+	s.send(bytes(str(frag), 'utf-8'))
+	msg = s.recv(1024)
+	#working -=1
+	'''
+	else:
+		s.connect(("localhost", port))
+		s.send(bytes(str(frag), 'utf-8'))
+		msg = s.recv(1024)
+		working -= 1
+	'''
+	msg = str(msg, 'utf-8')
+	print (msg)
+	lock.release()
+	#conn.sendto(bytes(str(frag).encode('utf-8')), addr)
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('localhost', 3333))
 s.listen(5)
-flag = 0
 
-threads = []
-stop_threads = False
-id = 1
 for i in range(3):
-    threads.append(Thread(target = clientHandler))
-
-for i in threads:
-	i.start()
+    Thread(target = clientHandler).start()
 
 while len(connections)<3:
 	continue
 
-threads = []
-#for i in range(3):
-	#threads.append(Thread(target = buildMST, arg = (frag, conn, addr)))
-
+lock = Lock()
 noOfConnections = len(connections)
 
+for i in range(len(fragments)):
+#	if len(fragments) == 1:
+		#break
+	Thread(target = buildMST, args = [ports[i%noOfConnections], fragments[i], lock]).start()
+
+'''
 s = [socket.socket(socket.AF_INET, socket.SOCK_STREAM)]*noOfConnections
 for i in range(noOfConnections):
 	print (s[i], ports[i])
@@ -151,7 +167,7 @@ for i in range(noOfConnections):
 	msg = str(msg, 'utf-8')
 	print (msg)
 	#s[i].close()
-
+'''
 #connections[1].sendto(bytes('lol', 'utf-8'), addresses[i])
 '''
 while len(fragments) != 1:
