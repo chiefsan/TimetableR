@@ -17,9 +17,9 @@ time
     - Create `csv` files for each of the following
        - Available time slots
        - Available rooms
-       - Requirements of the form (Course, Professor, Room1, Room2, Slot1, Slot2) including the header (refer [this]())
+       - Requirements of the form (Course, Professor, Room1, Room2, Slot1, Slot2) including the header (refer [this](https://github.com/chiefsan/TimetableR/blob/master/initialData.csv))
 - #### Method 2
     - Modify the code in the method `main` by commenting and uncommenting the necessary lines to read input from the terminal
 
 ## License
-[MIT]()
+[MIT](https://github.com/chiefsan/TimetableR/blob/master/LICENSE)
